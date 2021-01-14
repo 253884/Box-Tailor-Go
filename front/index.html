@@ -1,5 +1,16 @@
-<html lang="english">
-    <body>
-        <header>Hello!</header>
-    </body>
+<html>
+<head>
+    <title>Test</title>
+    <style></style>
+    <script type="text/tiscript">
+
+event click $(b1) {
+  var r = view.selectFile(#open,"html files|*.html;*htm", "htm", "d:/github/");
+  stdout.println(r);
+}
+        </script>
+</head>
+<body>
+<button #b1>Open</button>
+</body>
 </html>

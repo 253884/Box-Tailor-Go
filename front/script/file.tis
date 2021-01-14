@@ -1,0 +1,10 @@
+$(#selFile).on("click", function() {
+            const filter = "*.plt|All Files (*.*)|*.*";
+            const defaultExt = "plt";
+            const initialPath = System.path(#USER_DOCUMENTS);
+            const caption = "select file";
+            var file = view.selectFile(#open, filter, defaultExt, initialPath, caption );
+            $(input[id="fn"]).value = file
+            view.fn = file
+            view.sctoP(view.file)
+        });
