@@ -1,0 +1,19 @@
+event click $(#select_file_button) {
+    var fn = view.selectFile(#open-multiple,
+        "PLT Files (*.plt)|*.PLT|All Files(*.*)|*.*",
+        "plt");
+
+    if(fn && typeof fn == #array) {
+        fn = fn.map( filename => URL.toPath(filename);
+        view.msgbox(#alert, JSON.stringify(fn, "  "));
+        view.onFileSelected(JSON.stringify(fn))
+    } else if(fn && typeof fn == #string) {
+        fn = URL.toPath(fn);
+        view.msgbox(#alert, JSON.stringify(fn));
+        view.onFileSelected(fn)
+    }
+}
+
+function self.ready() {
+    view.windowMinSize = (350, 250)
+}

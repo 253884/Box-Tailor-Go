@@ -2,13 +2,10 @@ package box
 
 import (
 	"bufio"
-	"fmt"
-	"math/rand"
 	"os"
+	"path/filepath"
 	"regexp"
-	"sort"
 	"strconv"
-	"time"
 )
 
 type minS struct {
@@ -32,44 +29,11 @@ type Box struct {
 }
 
 const MaxUint = ^uint(0)
-
 //const MinUint = 0
 const MaxInt = int(MaxUint >> 1)
 const MinInt = -MaxInt - 1
+
 const Unit = 40 // 40 points per mm in HPGL
-
-func main() {
-	var path string
-	_, err := fmt.Scanln(&path)
-	Check(err)
-
-	fmt.Println(GetDimensions(path))
-
-	rand.Seed(time.Now().UnixNano())
-
-	var boxes []Box
-
-	for i := 0; i < 10; i++ {
-		n := Box{strconv.Itoa(i + 1), Dimensions{rand.Intn(100) + 1, rand.Intn(100) + 1}}
-		//fmt.Println(n)
-		boxes = append(boxes, n)
-	}
-
-	sort.SliceStable(boxes, func(i, j int) bool {
-		return boxes[i].size.x < boxes[j].size.x
-	})
-
-	fmt.Println(boxes)
-
-	lookFor := rand.Intn(100) + 1
-	result := LessOrEqual(boxes, lookFor)
-
-	if result < 0 {
-		fmt.Println(lookFor, result, "No box small enough.")
-	} else {
-		fmt.Println(lookFor, result, boxes[result])
-	}
-}
 
 func Check(err error) {
 	if err != nil {
@@ -119,6 +83,12 @@ func GetNumbers(s string) []string {
 }
 
 func GetDimensions(path string) Dimensions { // TO BE FINISHED
+
+	if extension := filepath.Ext(path); extension != ".plt" {
+		dimensions := Dimensions{-1, -1}
+		return dimensions
+	}
+
 	file, err := os.Open(path)
 	Check(err)
 	defer func() {
@@ -133,7 +103,7 @@ func GetDimensions(path string) Dimensions { // TO BE FINISHED
 		minS{MaxInt, MaxInt},
 		maxS{MinInt, MinInt},
 	}
-
+	
 	dimensions := Dimensions{}
 
 	scanner := bufio.NewScanner(file)

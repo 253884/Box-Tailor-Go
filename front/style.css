@@ -1,0 +1,30 @@
+html{
+    background-color: #232323;
+}
+
+body{
+    background-color: #2a2a2a;
+    margin: 10px;
+    border-radius: 10px;
+    padding: 10%;
+    color: #a3a3a3;
+}
+
+.top_right {
+    position: absolute;
+    right: 0;
+    /*noinspection CssInvalidPropertyValue*/
+    top: -14;
+}
+
+.select-button {
+    font-size: 17px;
+    border-radius: 4px;
+    background: #232323;
+    color: #f5f5f5;
+    text-align: center;
+}
+
+.select-button:hover {
+    background: #3a3a3a;
+}

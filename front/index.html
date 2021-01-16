@@ -1,16 +1,30 @@
-<html>
-<head>
-    <title>Test</title>
-    <style></style>
-    <script type="text/tiscript">
+<html><!--custom-frame="solid"-->
 
-event click $(b1) {
-  var r = view.selectFile(#open,"html files|*.html;*htm", "htm", "d:/github/");
-  stdout.println(r);
-}
-        </script>
-</head>
-<body>
-<button #b1>Open</button>
-</body>
+    <style src="rice://front/style.css"></style>
+
+    <!-- check C:\Sciter\samples\
+    using C:\Users\abor\Documents\Programming\Sciter\New folder,
+    e.g. ~\dialogs+windows -->
+
+    <body>
+        <div>
+            <h2 style="text-align: center ">
+                welcome to the
+            </h2>
+            <h1 style="text-align: center; color: whitesmoke ">
+                Box Tailor
+            </h1>
+        </div>
+
+       <!-- <p class="top_right"> create button group https://www.w3schools.com/howto/howto_css_button_group.asp
+            <button role="window-minimize" class="window-button">-</button>
+            <button role="window-maximize" class="window-button">O</button>
+            <button role="window-close" class="window-button">X</button>
+        </p> -->
+        <script type="text/tiscript" src="rice://front/script.tis"></script>
+
+        <form style="text-align: center">
+            <button class="select-button" #select_file_button>Select Files</button>
+        </form>
+    </body>
 </html>
