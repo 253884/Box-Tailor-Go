@@ -1,10 +1,78 @@
-<html><!--custom-frame="solid"-->
+<html>
 
-    <style src="rice://front/style.css"></style>
+    <style>
+        html{
+            background-color: #232323;
+        }
 
-    <!-- check C:\Sciter\samples\
-    using C:\Users\abor\Documents\Programming\Sciter\New folder,
-    e.g. ~\dialogs+windows -->
+        body {
+            background-color: #2a2a2a;
+            margin: 10px;
+            border-radius: 10px;
+            padding: 10%;
+            color: #a3a3a3;
+        }
+
+        .select-button {
+            font-size: 17px;
+            border-radius: 4px;
+            background: #3a3a3a;
+            color: #f5f5f5;
+            text-align: center;
+        }
+
+        .select-button:hover {
+            background: #232323;
+        }
+    </style>
+
+    <script type="text/tiscript">
+function self.ready() {
+    view.windowMinSize = (350, 250);
+}
+    </script>
+
+    <script type="text/tiscript">
+event click $(#select_file_button) {
+    var inputFile = view.selectFile(
+        #open-multiple,
+        "PLT Files (*.plt)|*.PLT|All Files(*.*)|*.*",
+        "plt");
+
+    if(inputFile && typeof inputFile == #array) {
+        inputFile = inputFile.map( filename => URL.toPath(filename));
+        $(#input_file_path).value = JSON.stringify(inputFile);
+    }
+    else if(inputFile && typeof inputFile == #string) {
+        inputFile = URL.toPath(inputFile);
+        $(#input_file_path).value = inputFile;
+    }
+}
+    </script>
+
+    <script type="text/tiscript">
+event click $(#select_folder_button) {
+    var outputFolder = view.selectFolder();
+
+    if(outputFolder) {
+        outputFolder = URL.toPath(outputFolder);
+        $(#output_folder_path).value = outputFolder;
+    }
+}
+    </script>
+
+    <script type="text/tiscript">
+event click $(#tailor_button) {
+    if($(#input_file_path).value.length != 0) {
+        var input = $(#input_file_path).value;
+        var output = $(#output_folder_path).value;
+        view.buttonPress(input, output);
+    } else {
+        view.msgbox(#alert, "No input files!", "Task failed miserably.");
+    }
+    $(#input_file_path).value = $(#output_folder_path).value = ""
+}
+    </script>
 
     <body>
         <div>
@@ -16,15 +84,18 @@
             </h1>
         </div>
 
-       <!-- <p class="top_right"> create button group https://www.w3schools.com/howto/howto_css_button_group.asp
-            <button role="window-minimize" class="window-button">-</button>
-            <button role="window-maximize" class="window-button">O</button>
-            <button role="window-close" class="window-button">X</button>
-        </p> -->
-        <script type="text/tiscript" src="rice://front/script.tis"></script>
+        <form style="text-align: center">
+            <button class="select-button" #select_file_button>Select input files</button>
+            <input type="text" #input_file_path value="" readonly>
+        </form>
 
         <form style="text-align: center">
-            <button class="select-button" #select_file_button>Select Files</button>
+            <button class="select-button" #select_folder_button>Select output folder</button>
+            <input type="text" #output_folder_path value="" readonly>
+        </form>
+
+        <form style="text-align: center">
+            <button class="select-button" #tailor_button>Tailor</button>
         </form>
     </body>
 </html>

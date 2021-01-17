@@ -4,10 +4,11 @@ event click $(#select_file_button) {
         "plt");
 
     if(fn && typeof fn == #array) {
-        fn = fn.map( filename => URL.toPath(filename);
+        fn = fn.map( filename => URL.toPath(filename));
         view.msgbox(#alert, JSON.stringify(fn, "  "));
         view.onFileSelected(JSON.stringify(fn))
-    } else if(fn && typeof fn == #string) {
+    }
+    else if(fn && typeof fn == #string) {
         fn = URL.toPath(fn);
         view.msgbox(#alert, JSON.stringify(fn));
         view.onFileSelected(fn)
@@ -15,5 +16,5 @@ event click $(#select_file_button) {
 }
 
 function self.ready() {
-    view.windowMinSize = (350, 250)
+    view.windowMinSize = (350, 250);
 }
