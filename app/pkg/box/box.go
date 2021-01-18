@@ -2,13 +2,15 @@ package box
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 
 	u "../utility"
 )
+
+const Unit = 40 // 40 points per mm in HPGL
 
 var (
 	WallThk = 5
@@ -36,13 +38,14 @@ func (p *Point2d) toOrigin() string {
 	return "PU:0,0;"
 }
 
+
 type Vector2d struct {
-	origin u.IntPair
-	end    u.IntPair
+	Origin u.IntPair
+	End    u.IntPair
 }
 
 type Dimensions struct {
-	x, y, z int
+	X, Y, Z int
 }
 
 type Product struct {
@@ -92,178 +95,154 @@ func (p *Product) GetDimensions() {
 				}
 			}
 		}
-		(*p).Size.x, (*p).Size.y = (ext.Max.X-ext.Min.X)/Unit, (ext.Max.Y-ext.Min.Y)/Unit
+		(*p).Size.X, (*p).Size.Y, (*p).Size.Z = (ext.Max.X-ext.Min.X)/Unit, (ext.Max.Y-ext.Min.Y)/Unit, 20
 	}
 	err = scanner.Err()
 	u.Check(err)
 }
+
 
 type Box struct {
 	Content   Product
-	size      u.IntPair
-	CutOrigin u.IntPair   // relative position of first cut
-	ToCut     []u.IntPair // altering x, y with each move
-	ToEngrave []Vector2d  // origin point x,y; relative endpoint x,y
+	Size      u.IntPair
+	AddSpace Dimensions // additional space for foam ETC
 }
 
-func (b *Box) addCuts(arr ...int) {
-
+func returnPLT(origin Point2d, arr ...int) []string {
+	var result []string
 	for i, v := range arr {
-		if i%2 != 0 {
-			(*b).ToCut = append((*b).ToCut, u.IntPair{X: arr[i-1], Y: v})
+		if i%2 == 0 {
+			result = append(result, origin.line(v, 0))
+		} else {
+			result = append(result, origin.line(0, v))
 		}
 	}
 	if len(arr)%2 != 0 {
-		(*b).ToCut = append((*b).ToCut, u.IntPair{X: arr[len(arr)-1]})
+		result = append(result, origin.line(arr[len(arr)-1], 0))
 	}
+	return result
 }
 
-func (b *Box) CalculateShape() {
-	x, y, z, w := b.Content.Size.x, b.Content.Size.y, b.Content.Size.z, WallThk
+func (b *Box) CalculateSize() {
+	x, y, z, w := b.Content.Size.X + b.AddSpace.X, b.Content.Size.Y + b.AddSpace.Y, b.Content.Size.Z + b.AddSpace.Z, WallThk
+	(*b).Size.X, (*b).Size.Y = 2*x+4*z+6*w, y+2*z+2*w
+}
+
+func (b *Box) DefaultAddSpace() {
+	(*b).AddSpace.X, (*b).AddSpace.Y, (*b).AddSpace.Z = 30, 30, 50
+}
+
+func (b *Box) DrawBox(outputPath string, origin Point2d) {
+	x, y, z, w := b.Content.Size.X + b.AddSpace.X, b.Content.Size.Y + b.AddSpace.Y, b.Content.Size.Z + b.AddSpace.Z, WallThk
 
 	leftWallX := 3*WallThk + 2*z
-	(*b).CutOrigin = u.IntPair{X: leftWallX - y/2}
-	if b.CutOrigin.X < 0 {
-		(*b).CutOrigin.X = 0
+	CutOrigin := u.IntPair{X: leftWallX - y/2}
+	if CutOrigin.X < 0 {
+		CutOrigin.X = 0
 	} // too long
 
-	(*b).size.X, (*b).size.Y = 2*x+4*z+6*w, y+2*z+2*w // calculate box dimensions
+	(*b).Size.X, (*b).Size.Y = 2*x+4*z+6*w, y+2*z+2*w // calculate box dimensions
 
-	(*b).addCuts(
-		leftWallX-b.CutOrigin.X+WallThk+x+WallThk+y, // x
-		z, // y
+	result := returnPLT( origin,
+		leftWallX-CutOrigin.X+WallThk+x+WallThk+y, // x
+			z, // y
 		-z,
-		WallThk,
+			WallThk,
 		WallThk+z+WallThk,
-		-(WallThk + z),
+			-(WallThk + z),
 		x,
+			WallThk+z,
 		WallThk+z,
-		WallThk+z,
-		y,
+			y,
 		-(WallThk + z),
-		WallThk+z,
+			WallThk+z,
 		-x,
-		-(WallThk + z),
+			-(WallThk + z),
 		-(WallThk + z + WallThk),
-		WallThk,
+			WallThk,
 		WallThk+z,
-		z,
-		-(leftWallX - b.CutOrigin.X + WallThk + x + WallThk + y),
-		-z,
+			z,
+		-(leftWallX - CutOrigin.X + WallThk + x + WallThk + y),
+			-z,
 		z+WallThk,
-		-WallThk,
+			-WallThk,
 		-leftWallX,
-		-y,
+			-y,
 		z+2*w+z,
-		-w,
+			-w,
 		-(z + w),
-		-z)
-}
+			-z)
 
-func (b *Box) Tailor(outputPath string, origin Point2d) {
-	file, err := os.Create(outputPath) // create output file
+	file, err := os.Create(outputPath)
 	u.Check(err)
-	defer func() {
-		err = file.Close()
-		u.Check(err)
-	}() // close output file, check for err
 
-	if b.Content.Size.x <= 0 {
-		log.Println("This box has no Content!")
-		return
-	}
-
-	if len(b.ToCut) <= 0 {
-		(*b).CalculateShape()
-	}
-
-	_, _ = file.WriteString("IN;\nLT;\n") // initialize file
-	_, _ = file.WriteString("SP1;\n")     // choose pen: cut
-	_, _ = file.WriteString("PU:" + strconv.Itoa(b.CutOrigin.X*Unit) + "," + strconv.Itoa(b.CutOrigin.Y*Unit) + ";\n")
-	for _, v := range b.ToCut {
-		if v.X != 0 {
-			_, _ = file.WriteString(origin.line(v.X, 0))
-		}
-		if v.Y != 0 {
-			_, _ = file.WriteString(origin.line(0, v.Y))
-		}
-	}
-	_, _ = file.WriteString("SP0;\n")
-}
-
-const Unit = 40 // 40 points per mm in HPGL
-
-func LessOrEqual(boxes []Box, target int) int {
-	var (
-		l = 0
-		r = len(boxes) - 1
-	)
-
-	for l < r {
-
-		m := (l + r + 1) / 2
-
-		if boxes[m].size.Y > target {
-			r = m - 1
-		} else {
-			l = m
-		}
-	}
-	if boxes[l].size.Y > target {
-		return -1
-	}
-	return l
-}
-
-func GetDimensions(path string) Dimensions { // TO BE FINISHED
-
-	if extension := filepath.Ext(path); extension != ".plt" {
-		dimensions := Dimensions{-1, -1, -1}
-		return dimensions
-	}
-
-	file, err := os.Open(path)
+	_, err = file.WriteString("IN;\nLT;\nSP1;\n")
 	u.Check(err)
-	defer func() {
-		err := file.Close()
+	for _, v := range result{
+		_, err := file.WriteString(v+"\n")
 		u.Check(err)
-	}()
-
-	extremes := struct {
-		min u.MinS
-		max u.MaxS
-	}{
-		u.MinS{X: u.MaxInt, Y: u.MaxInt},
-		u.MaxS{X: u.MinInt, Y: u.MinInt},
 	}
+}
 
-	dimensions := Dimensions{}
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line[0] == 'P' { // PD [pen down] set coordinates
-			if line[1] == 'D' {
-				stringSlice := u.GetNumbers(scanner.Text())
+func lessOrEqual(boxes []Box, target int, s rune) int {
 
-				for i, v := range stringSlice {
-					v, err := strconv.Atoi(v)
-					u.Check(err)
-
-					if i%2 == 0 {
-						extremes.min.X = u.Min(v, extremes.min.X)
-						extremes.max.X = u.Max(v, extremes.max.X)
-					} else {
-						extremes.min.Y = u.Min(v, extremes.min.Y)
-						extremes.max.Y = u.Max(v, extremes.max.Y)
-					}
-				}
+	if s == 'x' {
+		for i, v := range boxes {
+			if v.Size.X <= target {
+				return i
 			}
 		}
-		dimensions.x, dimensions.y = (extremes.max.X-extremes.min.X)/Unit, (extremes.max.Y-extremes.min.Y)/Unit
+		return -1
+	} else {
+		for i, v := range boxes {
+			if v.Size.Y <= target {
+				return i
+			}
+		}
+		return -1
 	}
-	err = scanner.Err()
-	u.Check(err)
+}
 
-	return dimensions
+func removeBox(b []Box, i int) []Box {
+	if i == len(b)-1 {
+		return b[:i]
+	}
+	return append(b[:i], b[i+1:]...)
+}
+
+func ShelfPack(boxes []Box, boardSize u.IntPair) [][]Box {
+	sort.SliceStable(boxes, func(i, j int) bool {
+		return boxes[i].Size.Y > boxes[j].Size.Y
+	})
+
+	var (
+		shelf []Box
+		rack [][]Box
+		currPos int
+	)
+
+	for len(boxes) > 0 {
+		i := lessOrEqual(boxes, boardSize.X - currPos, 'x')
+
+		if i == -1 {
+			currPos= 0
+
+			rack = append(rack, shelf)
+			shelf = []Box{}
+
+			i = 0
+		}
+
+		shelf = append(shelf, boxes[i])
+		boxes = removeBox(boxes, i)
+		currPos += shelf[len(shelf)-1].Size.X
+
+		if len(boxes) == 0 {
+			rack = append(rack, shelf)
+			shelf = []Box{}
+			currPos = 0
+		}
+	}
+	return rack
 }

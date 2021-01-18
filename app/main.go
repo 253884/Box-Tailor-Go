@@ -14,15 +14,15 @@ import (
 
 func main() {
 	// define window position and size
-	winRect := sciter.NewRect(100, 100, 400, 300)
+	winRect := sciter.NewRect(100, 100, 500, 400)
 
 	// create new window
 	win, err := window.New(
 		sciter.SW_MAIN|
-			sciter.SW_ENABLE_DEBUG|
-			sciter.SW_CONTROLS|
-			sciter.SW_RESIZEABLE|
-			sciter.SW_TITLEBAR,
+		sciter.SW_ENABLE_DEBUG|
+		sciter.SW_CONTROLS|
+		sciter.SW_RESIZEABLE|
+		sciter.SW_TITLEBAR,
 		winRect)
 	if err != nil {
 		panic(err)

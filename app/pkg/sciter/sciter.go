@@ -1,9 +1,9 @@
 package sciter
 
 import (
+	"fmt"
 	"log"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	b "../box"
@@ -14,18 +14,18 @@ import (
 
 func ButtonPress(args ...*sciter.Value) *sciter.Value {
 
-	fp := args[0].String() // file path
+	fp, outputPath := args[0].String(), args[1].String() // file path
 
-	var outputPath string
-	if len(args) > 1 {
-		outputPath = args[1].String()
+	if  outputPath == "" {
+		outputPath = "./"
 	}
 
 	if outputPath[len(outputPath)-1] != '/' {
 		outputPath += "/"
 	}
 
-	log.Println(fp, outputPath)
+	log.Println("file path:", fp)
+	log.Println("output path:", outputPath)
 
 	if fp[0] == '[' {
 		fp = u.DelChar(fp, 0)
@@ -49,17 +49,26 @@ func ButtonPress(args ...*sciter.Value) *sciter.Value {
 		p := b.Product{Source: v}
 		p.GetDimensions()
 		p.Name = strings.TrimSuffix(filepath.Base(p.Source), filepath.Ext(p.Source))
-		log.Println(p.Source, "dimensions: ", p.Size)
+		fmt.Println(p.Source, "dimensions: ", p.Size)
 
 		tmp := b.Box{Content: p}
-		tmp.CalculateShape()
+		tmp.DefaultAddSpace()
+		tmp.CalculateSize()
 
 		product = append(product, p)
 		box = append(box, tmp)
 	}
 
-	for i, v := range box {
-		v.Tailor(outputPath+"box_"+v.Content.Name+"_"+strconv.Itoa(i)+".plt", b.Point2d{})
+	rack := b.ShelfPack(box, u.IntPair{X: 1500, Y: 2500})
+
+	originPoint := b.Point2d{X: 0, Y: 0}
+	for _, v := range rack {
+		for _, w := range v {
+			w.DrawBox(outputPath+"box_"+w.Content.Name+".plt", originPoint)
+
+			originPoint.X += w.Size.X
+		}
+		originPoint.Y += v[0].Size.Y
 	}
 
 	return sciter.NullValue()
