@@ -1,4 +1,4 @@
-package sciter
+package sct
 
 import (
 	"fmt"
@@ -53,23 +53,17 @@ func ButtonPress(args ...*sciter.Value) *sciter.Value {
 
 		tmp := b.Box{Content: p}
 		tmp.DefaultAddSpace()
+		tmp.Type = 'f'
 		tmp.CalculateSize()
+		fmt.Println(tmp)
 
 		product = append(product, p)
 		box = append(box, tmp)
 	}
+	boardSize := u.IntPair{X: 0, Y: 0}
 
-	rack := b.ShelfPack(box, u.IntPair{X: 1500, Y: 2500})
-
-	originPoint := b.Point2d{X: 0, Y: 0}
-	for _, v := range rack {
-		for _, w := range v {
-			w.DrawBox(outputPath+"box_"+w.Content.Name+".plt", originPoint)
-
-			originPoint.X += w.Size.X
-		}
-		originPoint.Y += v[0].Size.Y
-	}
+	rack := b.ShelfPack(box, boardSize)
+	b.SplitToBoards(rack, boardSize, outputPath)
 
 	return sciter.NullValue()
 }

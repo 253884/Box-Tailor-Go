@@ -5,16 +5,6 @@ import (
 	"regexp"
 )
 
-type MinS struct {
-	X int
-	Y int
-}
-
-type MaxS struct {
-	X int
-	Y int
-}
-
 const (
 	MaxUint = ^uint(0)
 	MinUint = 0
@@ -31,26 +21,29 @@ type Extremes struct {
 	Max IntPair
 }
 
+// Check checks if any errors occurred.
 func Check(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-func Max(a, b int) int {
+/*func Max(a, b int) int {
 	if a < b {
 		return b
 	}
 	return a
-}
+}*/ // to do MAX
 
-func Min(a, b int) int {
+// Min returns sm
+/*func Min(a, b int) int {
 	if a > b {
 		return b
 	}
 	return a
-}
+}*/ // to do MIN
 
+// Area calculates area/volume by multiplying input values.
 func Area(arr ...int) int {
 	if len(arr) == 0 {
 		log.Panic("err: no arguments provided")
@@ -62,12 +55,15 @@ func Area(arr ...int) int {
 	return result
 }
 
+// DelChar removes a char from the string.
 func DelChar(s string, i int) string {
 	r := []rune(s)
 	return string(append(r[0:i], r[i+1:]...))
 }
 
+// GetNumbers looks for numbers in provided string and returns them as string slice separately.
 func GetNumbers(s string) []string {
-	re := regexp.MustCompile("[0-9]+")
+	//re := regexp.MustCompile("[0-9]+")
+	re := regexp.MustCompile(`[-]?\d[\d,]*[\.]?[\d{2}]*`)
 	return re.FindAllString(s, -1)
 }
