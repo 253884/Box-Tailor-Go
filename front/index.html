@@ -1,39 +1,169 @@
-<html>
+<html lang="en">
+    <head>
+        <style>
+            html{
+                background-color: #232323;
+            }
 
-    <style>
-        html{
-            background-color: #232323;
-        }
+            body {
+                background-color: #2a2a2a;
+                margin: 34px 0 0 10px;
+                border-top-left-radius: 10px;
+                padding: 3%;
+                color: #a3a3a3;
+            }
 
-        body {
-            background-color: #2a2a2a;
-            margin: 10px;
-            border-radius: 10px;
-            padding: 10%;
-            color: #a3a3a3;
-        }
+            .select-button {
+                font-size: 17px;
+                border-radius: 4px;
+                background: #3a3a3a;
+                color: #f5f5f5;
+                text-align: center;
+            }
 
-        .select-button {
-            font-size: 17px;
-            border-radius: 4px;
-            background: #3a3a3a;
-            color: #f5f5f5;
-            text-align: center;
-        }
+            .select-button:hover {
+                background: #232323;
+            }
 
-        .select-button:hover {
-            background: #232323;
-        }
-    </style>
+            .input {
+                margin-left: -1px;
+                width: 30%;
+                height: 16px;
+                display: inline-block;
+            }
 
-    <script type="text/tiscript">
+            .abtn {
+                display: inline-block;
+                margin-left: -1px;
+            }
+
+            .setting_short {
+                width: 30px;
+            }
+
+            .setting_long {
+                width: 50px;
+            }
+
+            .setting_longer {
+                width: 75px;
+            }
+
+            .setting_path {
+                width: 120px;
+            }
+
+        </style>
+
+        <script type="text/tiscript">
 function self.ready() {
-    view.windowMinSize = (400, 400);
+    view.windowMinSize = (450, 502);
 }
-    </script>
 
-    <script type="text/tiscript">
-event click $(#select_file_button) {
+event click $(#load_defaults) {
+    var str = view.getSettings();
+    var res = str.split("|");
+
+    $(#path_add_x_mailer).value = res[5];
+    $(#path_add_y_mailer).value = res[6];
+    $(#path_add_z_mailer).value = res[7];
+
+    $(#add_x_mailer).value = res[5];
+    $(#add_y_mailer).value = res[6];
+    $(#add_z_mailer).value = res[7];
+
+    $(#path_add_x_flap).value = res[5];
+    $(#path_add_y_flap).value = res[6];
+    $(#path_add_z_flap).value = res[7];
+
+    $(#add_x_flap).value = res[5];
+    $(#add_y_flap).value = res[6];
+    $(#add_z_flap).value = res[7];
+
+    $(#board_x).value = res[8];
+    $(#board_y).value = res[9];
+}
+
+function Element.toggle()
+{
+    this.attributes["hidden"] = this.attributes["hidden"] ? undefined : true;
+}
+
+$(#settings).attributes["hidden"] = true;
+event click $(#settings_button) {
+    var str = view.getSettings();
+    var res = str.split("|");
+
+    $(#wall_thk).value = res[0];
+    $(#margin_x).value = res[1];
+    $(#margin_y).value = res[2];
+    $(#box_dist_x).value = res[3];
+    $(#box_dist_y).value = res[4];
+    $(#box_add_spc_x).value = res[5];
+    $(#box_add_spc_y).value = res[6];
+    $(#box_add_spc_z).value = res[7];
+    $(#def_board_x).value = res[8];
+    $(#def_board_y).value = res[9];
+
+    $(#app).toggle();
+    $(#settings).toggle();
+}
+
+event click $(#cancel_settings) {
+    $(#app).toggle();
+    $(#settings).toggle();
+}
+
+event click $(#apply_settings) {
+    if( $(#wall_thk).value < 1 ){
+        $(#wall_thk).value = 1;
+    }
+    if( $(#margin_x).value < 0 ){
+        $(#margin_y).value = 0;
+    }
+    if( $(#margin_y).value < 0 ){
+        $(#margin_y).value = 0;
+    }
+    if( $(#box_dist_x).value < 0 ){
+        $(#box_dist_x).value = 0;
+    }
+    if( $(#box_dist_y).value < 0 ){
+        $(#box_dist_y).value = 0;
+    }
+    if( $(#box_add_spc_x).value < 0 ){
+        $(#box_add_spc_x).value = 0;
+    }
+    if( $(#box_add_spc_y).value < 0 ){
+        $(#box_add_spc_y).value = 0;
+    }
+    if( $(#box_add_spc_z).value < 0 ){
+        $(#box_add_spc_z).value = 0;
+    }
+    if( $(#def_board_x).value < 1 ){
+        $(#def_board_x).value = 1;
+    }
+    if( $(#def_board_y).value < 1 ){
+        $(#def_board_y).value = 1;
+    }
+
+    var wallThk = $(#wall_thk).value;
+    var marginX = $(#margin_x).value;
+    var marginY = $(#margin_y).value;
+    var boxDistX = $(#box_dist_x).value;
+    var boxDistY = $(#box_dist_y).value;
+    var boxAddSpcX = $(#box_add_spc_x).value;
+    var boxAddSpcY = $(#box_add_spc_y).value;
+    var boxAddSpcZ = $(#box_add_spc_z).value;
+    var defBoardX = $(#def_board_x).value;
+    var defBoardY = $(#def_board_y).value;
+
+    view.changeSettings(wallThk, marginX, marginY, boxDistX, boxDistY, boxAddSpcX, boxAddSpcY, boxAddSpcZ, defBoardX, defBoardY);
+
+    $(#app).toggle();
+    $(#settings).toggle();
+}
+
+event click $(#select_files_mailer) {
     var inputFile = view.selectFile(
         #open-multiple,
         "PLT Files (*.plt)|*.PLT|All Files(*.*)|*.*",
@@ -41,16 +171,29 @@ event click $(#select_file_button) {
 
     if(inputFile && typeof inputFile == #array) {
         inputFile = inputFile.map( filename => URL.toPath(filename));
-        $(#input_file_path).value = JSON.stringify(inputFile);
+        $(#input_path_mailer).value = JSON.stringify(inputFile);
     }
     else if(inputFile && typeof inputFile == #string) {
         inputFile = URL.toPath(inputFile);
-        $(#input_file_path).value = inputFile;
+        $(#input_path_mailer).value = inputFile;
     }
 }
-    </script>
 
-    <script type="text/tiscript">
+event click $(#select_files_flap) {
+    var inputFile = view.selectFile(
+        #open-multiple,
+        "PLT Files (*.plt)|*.PLT|All Files(*.*)|*.*",
+        "plt");
+
+    if(inputFile && typeof inputFile == #array) {
+        inputFile = inputFile.map( filename => URL.toPath(filename));
+        $(#input_path_flap).value = JSON.stringify(inputFile);
+    }
+    else if(inputFile && typeof inputFile == #string) {
+        inputFile = URL.toPath(inputFile);
+        $(#input_path_flap).value = inputFile;
+    }
+}
 event click $(#select_folder_button) {
     var outputFolder = view.selectFolder();
 
@@ -59,43 +202,289 @@ event click $(#select_folder_button) {
         $(#output_folder_path).value = outputFolder;
     }
 }
-    </script>
 
-    <script type="text/tiscript">
 event click $(#tailor_button) {
-    if($(#input_file_path).value.length != 0) {
-        var input = $(#input_file_path).value;
-        var output = $(#output_folder_path).value;
-        view.buttonPress(input, output);
+
+//mailer
+
+    if($(#input_path_mailer).value.length != 0) {
+        var mailerInputPath = $(#input_path_mailer).value;
     } else {
-        view.msgbox(#alert, "No input files!", "Task failed miserably.");
+        var mailerInputPath = "empty";
     }
+
+    if($(#input_path_z_mailer).value > 0) {
+        var mailerInputPathZ = $(#input_path_z_mailer).value;
+    } else {
+        if(mailerInputPath == "empty"){
+            var mailerInputPathZ = 0;
+        } else {
+            var mailerInputPathZ = 1;
+        }
+    }
+
+    if($(#path_add_x_mailer).value > 0) {
+        var mailerPathAddX = $(#path_add_x_mailer).value;
+    } else {
+        var mailerPathAddX = 0;
+    }
+
+    if($(#path_add_x_mailer).value > 0) {
+        var mailerPathAddX = $(#path_add_x_mailer).value;
+    } else {
+        var mailerPathAddX = 0;
+    }
+
+    if($(#path_add_y_mailer).value > 0) {
+        var mailerPathAddY = $(#path_add_y_mailer).value;
+    } else {
+        var mailerPathAddY = 0;
+    }
+
+    if($(#path_add_z_mailer).value > 0) {
+        var mailerPathAddZ = $(#path_add_z_mailer).value;
+    } else {
+        var mailerPathAddZ = 0;
+    }
+
+//dimesion mailer
+
+    if($(#input_x_mailer).value > 0) {
+        var mailerX = $(#input_x_mailer).value;
+    } else {
+        var mailerX = 0;
+    }
+
+    if($(#add_x_mailer).value > 0) {
+        var mailerAddX = $(#add_x_mailer).value;
+    } else {
+        var mailerAddX = 0;
+    }
+
+    if($(#input_y_mailer).value > 0) {
+        var mailerY = $(#input_y_mailer).value;
+    } else {
+        var mailerY = 0;
+    }
+
+    if($(#add_y_mailer).value > 0) {
+        var mailerAddY = $(#add_y_mailer).value;
+    } else {
+        var mailerAddY = 0;
+    }
+
+    if($(#input_z_mailer).value > 0) {
+        var mailerZ = $(#input_z_mailer).value;
+    } else {
+        var mailerZ = 0;
+    }
+
+    if($(#add_z_mailer).value > 0) {
+        var mailerAddZ = $(#add_z_mailer).value;
+    } else {
+        var mailerAddZ = 0;
+    }
+
+    if($(#input_copies_mailer).value > 0) {
+        var mailerCopies = $(#input_copies_mailer).value;
+    } else {
+        var mailerCopies = 0;
+    }
+
+//flap
+
+    if($(#input_path_flap).value.length != 0) {
+        var flapInputPath = $(#input_path_flap).value;
+    } else {
+        var flapInputPath = "empty";
+    }
+
+    if($(#input_path_z_flap).value > 0) {
+        var flapInputPathZ = $(#input_path_z_flap).value;
+    } else {
+        if(flapInputPath == "empty"){
+            var flapInputPathZ = 0;
+        } else {
+            var flapInputPathZ = 1;
+        }
+    }
+
+    if($(#path_add_x_flap).value > 0) {
+        var flapPathAddX = $(#path_add_x_flap).value;
+    } else {
+        var flapPathAddX = 0;
+    }
+
+    if($(#path_add_y_flap).value > 0) {
+        var flapPathAddY = $(#path_add_y_flap).value;
+    } else {
+        var flapPathAddY = 0;
+    }
+
+    if($(#path_add_z_flap).value > 0) {
+        var flapPathAddZ = $(#path_add_z_flap).value;
+    } else {
+        var flapPathAddZ = 0;
+    }
+
+// dimension flap
+
+    if($(#input_x_flap).value > 0) {
+        var flapX = $(#input_x_flap).value;
+    } else {
+        var flapX = 0;
+    }
+
+    if($(#add_x_flap).value > 0) {
+        var flapAddX = $(#add_x_flap).value;
+    } else {
+        var flapAddX = 0;
+    }
+
+    if($(#input_y_flap).value > 0) {
+        var flapY = $(#input_y_flap).value;
+    } else {
+        var flapY = 0;
+    }
+
+    if($(#add_y_flap).value > 0) {
+        var flapAddY = $(#add_y_flap).value;
+    } else {
+        var flapAddY = 0;
+    }
+
+    if($(#input_z_flap).value > 0) {
+        var flapZ = $(#input_z_flap).value;
+    } else {
+        var flapZ = 0;
+    }
+
+    if($(#add_z_flap).value > 0) {
+        var flapAddZ = $(#add_z_flap).value;
+    } else {
+        var flapAddZ = 0;
+    }
+
+    if($(#input_copies_flap).value > 0) {
+        var flapCopies = $(#input_copies_flap).value;
+    } else {
+        var flapCopies = 0;
+    }
+
+// output
+    if($(#output_folder_path).value.length != 0){
+        var output = $(#output_folder_path).value;
+    } else {
+        var output = "./"
+    }
+
+    //view.buttonPress(output, mailerInputPath, mailerInputPathZ, mailerPathAddX, mailerPathAddY, mailerPathAddZ, mailerX, mailerAddX, mailerY, mailerAddY, mailerZ, mailerAddZ, mailerCopies, flapInputPath, flapInputPathZ, flapPathAddX, flapPathAddY, flapPathAddZ, flapX, flapAddX, flapY, flapAddY, flapZ, flapAddZ, flapCopies);
+    view.msgbox(#alert, output, "");
     $(#input_file_path).value = $(#output_folder_path).value = ""
 }
-    </script>
+        </script> <!-- settings & clicks -->
+
+    </head>
 
     <body>
-        <div>
-            <h2 style="text-align: center ">
-                welcome to the
-            </h2>
-            <h1 style="text-align: center; color: whitesmoke ">
-                Box Tailor
-            </h1>
+        <h2 style="position: absolute; left: 10px; top: -11px; color: whitesmoke;">Box Tailor</h2>
+
+        <input type="button" class="select-button" style="position: absolute; right: 0; top: 0; border-top-right-radius: 0; border-bottom-right-radius: 0;"  #settings_button value="settings">
+
+        <div id="settings">
+            <p>Box wall thickness:</p> <input class="setting_short" type="number" min="1" #wall_thk/> <label>mm</label>
+            <p>Board margin:</p> <label>x:</label> <input class="setting_short" type="number" min="0" #margin_x/> <label>, y:</label> <input class="setting_short" type="number" min="0" #margin_y/> <label>[mm]</label>
+            <p>Distance between boxes:</p> <label>x:</label> <input class="setting_short" type="number" min="0" #box_dist_x/> <label>, y:</label> <input class="setting_short" type="number" min="0" #box_dist_y/> <label>[mm]</label>
+            <p>Additional space for foam ETC:</p> <label>x:</label> <input class="setting_short" type="number" min="0" #box_add_spc_x/> <label>, y:</label> <input class="setting_short" type="number" min="0" #box_add_spc_y/> <label>, z:</label> <input class="setting_short" type="number" min="0" #box_add_spc_z/> <label>[mm]</label>
+            <p>Size of board:</p> <input class="setting_long" type="number" min="1" #def_board_x/> <label>x</label> <input class="setting_long" type="number" min="1" #def_board_y/> <label>[mm]</label>
+            <p></p>
+            <button #apply_settings>Apply</button> <button style="margin-left: 15px;" #cancel_settings>Cancel</button>
         </div>
 
-        <form style="text-align: center">
-            <button class="select-button" #select_file_button>Select input files</button>
-            <input type="text" #input_file_path value="" readonly>
-        </form>
+        <div id="app">
 
-        <form style="text-align: center">
-            <button class="select-button" #select_folder_button>Select output folder</button>
-            <input type="text" #output_folder_path value="" readonly>
-        </form>
+            <div id="myDIV" class="header">
+                <h2>Products:</h2>
+            </div>
 
-        <form style="text-align: center">
-            <button class="select-button" #tailor_button>Tailor</button>
-        </form>
+            <div>
+                <label>In mailer boxes: </label>
+
+                <p>
+                    <label>Path:</label>
+                    <input type="text" class="input" #input_path_mailer readonly/><button class="abtn" #select_files_mailer>Browse</button>
+                    <label>, z:</label>
+                    <input type="number" class="setting_short" #input_path_z_mailer/>
+                    <label>, add: x: </label>
+                    <input type="number" class="setting_short" #path_add_x_mailer/>
+                    <label>, y: </label>
+                    <input type="number" class="setting_short" #path_add_y_mailer/>
+                    <label>, z: </label>
+                    <input type="number" class="setting_short" #path_add_z_mailer/>
+                    <label> [mm]</label>
+                </p>
+
+                <p>
+                    <label>x: </label>
+                    <input type="number" class="setting_short" #input_x_mailer/><label>+</label><input type="number" class="setting_short" #add_x_mailer/>
+                    <label>, y: </label>
+                    <input type="number" class="setting_short" #input_y_mailer/><label>+</label><input type="number" class="setting_short" #add_y_mailer/>
+                    <label>, z: </label>
+                    <input type="number" class="setting_short" #input_z_mailer/><label>+</label><input type="number" class="setting_short" #add_z_mailer/>
+                    <label>[mm], copies: </label>
+                    <input type="number" class="setting_short" #input_copies_mailer/>
+                </p>
+            </div>
+            <div>
+                <p><br><label>In flap boxes: </label></p>
+                <p>
+                    <label>Path:</label>
+                    <input type="text" class="input" #input_path_flap readonly/><button class="abtn" #select_files_flap>Browse</button>
+                    <label>, z:</label>
+                    <input type="number" class="setting_short" #input_path_z_flap/>
+                    <label>, add: x: </label>
+                    <input type="number" class="setting_short" #path_add_x_flap/>
+                    <label>, y: </label>
+                    <input type="number" class="setting_short" #path_add_y_flap/>
+                    <label>, z: </label>
+                    <input type="number" class="setting_short" #path_add_z_flap/>
+                    <label> [mm]</label>
+                </p>
+                <p>
+                    <label>x: </label>
+                    <input type="number" class="setting_short" #input_x_flap/><label>+</label><input type="number" class="setting_short" #add_x_flap/>
+                    <label>, y: </label>
+                    <input type="number" class="setting_short" #input_y_flap/><label>+</label><input type="number" class="setting_short" #add_y_flap/>
+                    <label>, z: </label>
+                    <input type="number" class="setting_short" #input_z_flap/><label>+</label><input type="number" class="setting_short" #add_z_flap/>
+                    <label>[mm], copies: </label>
+                    <input type="number" class="setting_short" #input_copies_flap/>
+                </p>
+
+                <p>
+                    <br>
+                    <label>Board dimensions:</label>
+                    <p>
+                        <label>x: </label>
+                        <input type="number" class="setting_long" #board_x>
+                        <label>, y: </label>
+                        <input type="number" class="setting_long" #board_y>
+                        <label> [mm]</label>
+                        <br>
+                    </p>
+                </p>
+            </div>
+
+            <div>
+                <p><br><label>Output folder:</label></p>
+                <p><input type="text" class="input" #output_folder_path readonly/><button class="abtn" #select_folder_button>Browse</button></p>
+            </div>
+
+            <div>
+                <button #load_defaults>Load Defaults</button>
+                <button #tailor_button>Tailor</button>
+            </div>
+
+        </div>
     </body>
 </html>

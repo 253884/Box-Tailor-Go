@@ -22,8 +22,6 @@ func main() {
 	}()
 	db.Initiate(dataBase)
 
-	db.EditSetting(dataBase, 1, 4)
-
 	box.UpdateSettingValues()
 
 	//db.AddSetting(dataBase, "WallThk", 5)
@@ -31,7 +29,7 @@ func main() {
 	//db.DeleteSetting(dataBase, 1)
 
 	// define window position and size
-	winRect := sciter.NewRect(100, 100, 400, 400)
+	winRect := sciter.NewRect(100, 100, 800, 600)
 
 	// create new window
 	win, err := window.New(
@@ -67,6 +65,8 @@ func main() {
 	}
 
 	win.DefineFunction("buttonPress", s.ButtonPress)
+	win.DefineFunction("getSettings", s.GetSettings)
+	win.DefineFunction("changeSettings", s.ChangeSettings)
 
 	//log.Println("Before")
 	win.Show()

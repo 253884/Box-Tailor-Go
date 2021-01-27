@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	b "../box"
+	"../db"
 	u "../utility"
 
 	"github.com/sciter-sdk/go-sciter"
@@ -64,6 +66,37 @@ func ButtonPress(args ...*sciter.Value) *sciter.Value {
 
 	rack := b.ShelfPack(box, boardSize)
 	b.SplitToBoards(rack, boardSize, outputPath)
+
+	return sciter.NullValue()
+}
+
+func GetSettings(args ...*sciter.Value) *sciter.Value {
+	dataBase := db.AccessData()
+	defer func() {
+		err := dataBase.Close()
+		u.Check(err)
+	}()
+
+	settings := db.ReadSettings(dataBase)
+
+	var result string
+	for _, v := range settings {
+		result += strconv.Itoa(v) + "|"
+	}
+
+	return sciter.NewValue(result)
+}
+
+func ChangeSettings(args ...*sciter.Value) *sciter.Value {
+	dataBase := db.AccessData()
+
+	for _, v := range args {
+		log.Println(v.Int())
+	}
+
+	for i, v := range args {
+		db.EditSetting(dataBase, i+1, v.Int())
+	}
 
 	return sciter.NullValue()
 }
