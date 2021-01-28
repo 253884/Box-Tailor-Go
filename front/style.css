@@ -52,11 +52,21 @@ b.del {
 }
 
 b.path {
+    border: 2px solid #232323;
+    border-radius: 3px;
+    background: #3a3a3a;
+    text-align: center;
+
     cursor: pointer;
 
     display:inline-block;
     behavior: clickable;
-    width: 1.2em;
+    size: 1.6em 1.6em;
+}
+
+b.path:hover {
+    border-color: #black;
+    background: #2a2a2a;
 }
 
 .input {
@@ -77,7 +87,7 @@ b.path {
 
 .setting_long {
     display: inline-block;
-    width: 53px;
+    width: 56px;
 }
 
 .setting_longer {

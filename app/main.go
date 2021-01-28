@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+	// access database
 	dataBase := db.AccessData()
 	defer func() {
 		err := dataBase.Close()
@@ -20,13 +21,10 @@ func main() {
 			log.Println("main1 err:", err)
 		}
 	}()
+	// create settings table if there is no such table
 	db.Initiate(dataBase)
 
 	box.UpdateSettingValues()
-
-	//db.AddSetting(dataBase, "WallThk", 5)
-	//db.EditSetting(dataBase, 1, 33)
-	//db.DeleteSetting(dataBase, 1)
 
 	// define window position and size
 	winRect := sciter.NewRect(100, 100, 800, 600)
