@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/sciter-sdk/go-sciter/rice"
 	"log"
 
 	"./pkg/box"
@@ -8,7 +9,6 @@ import (
 	s "./pkg/sct"
 
 	"github.com/sciter-sdk/go-sciter"
-	"github.com/sciter-sdk/go-sciter/rice"
 	"github.com/sciter-sdk/go-sciter/window"
 )
 
@@ -43,15 +43,17 @@ func main() {
 		panic(err)
 	}
 
-	// load app frontend
-	win.SetTitle("Box Tailor")
-	err = win.LoadFile("front/index.html")
-	if err != nil {
-		panic(err)
-	}
+	win.SetOption(sciter.SCITER_SET_DEBUG_MODE, 1)
 
 	// use 'rice' to handle html 'src' import
 	rice.HandleDataLoad(win.Sciter)
+
+	// load app frontend
+	win.SetTitle("Box Tailor")
+	err = win.LoadFile("rice://front/index.html")
+	if err != nil {
+		panic(err)
+	}
 
 	// enable features
 	ok := win.SetOption(

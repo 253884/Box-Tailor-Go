@@ -1,76 +1,185 @@
 package sct
 
 import (
-	"fmt"
-	"log"
-	"path/filepath"
-	"strconv"
-	"strings"
-
 	b "../box"
 	"../db"
 	u "../utility"
+	"path/filepath"
+
+	"fmt"
+	"log"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/sciter-sdk/go-sciter"
 )
 
-func ButtonPress(args ...*sciter.Value) *sciter.Value {
+func getProducts(s string) []b.Product {
+	var (
+		products []b.Product
+		boxCount int
+		)
 
-	fp, outputPath := args[0].String(), args[1].String() // file path
+	rule, err := regexp.Compile(`"(.*?)"`) // look for text between quotes
+	u.Check(err)
 
-	if  outputPath == "" {
-		outputPath = "./"
-	}
+	s = u.RemoveBraces(s)
 
-	if outputPath[len(outputPath)-1] != '/' {
-		outputPath += "/"
-	}
-
-	log.Println("file path:", fp)
-	log.Println("output path:", outputPath)
-
-	if fp[0] == '[' {
-		fp = u.DelChar(fp, 0)
-		if fp[len(fp)-1] == ']' {
-			fp = u.DelChar(fp, len(fp)-1)
+	if s[0] == '{' {
+		if s[len(s)-1] == '}' {
+			s = u.DelChar(s, 0)
+			s = u.DelChar(s, len(s)-1)
 		}
 	}
 
-	fp = strings.ReplaceAll(fp, string('"'), "")
-	paths := strings.Split(fp, ",")
+	arr := strings.Split(s, ",")
 
-	var product []b.Product
-	var box []b.Box
+	var p = b.Product{
+		Name:     "",
+		Source:   "",
+		Size:     b.Dimensions{},
+		AddSpace: b.Dimensions{},
+		Type:     0,
+	}
+	for _, v := range arr { // start of product input
+		tmp := rule.FindAllString(v, -1)
 
-	for _, v := range paths {
-		if filepath.Ext(v) != ".plt" {
-			log.Println("err:", v, "is not a *.plt file")
+		var label, value string
+		if len(tmp) >= 2 {
+			label, value = tmp[0], tmp[1]
+		} else if len(tmp) == 1 {
+			num := u.GetNumbers(v)
+			label, value = tmp[0], num[len(num)-1]
+		} else {
 			continue
 		}
 
-		p := b.Product{Source: v}
-		p.GetDimensions()
-		p.Name = strings.TrimSuffix(filepath.Base(p.Source), filepath.Ext(p.Source))
-		fmt.Println(p.Source, "dimensions: ", p.Size)
+		label = u.RemoveQuotes(label)
+		value = u.RemoveQuotes(value)
 
-		tmp := b.Box{Content: p}
-		tmp.DefaultAddSpace()
-		tmp.Type = 'f'
-		tmp.CalculateSize()
-		fmt.Println(tmp)
+		//fmt.Println(label, value, p)
 
-		product = append(product, p)
-		box = append(box, tmp)
+		switch label {
+		case "name":
+			if p.Name != "" {
+				if p.Size.X > 0 && p.Size.Y > 0 && p.Size.Z > 0 {
+					if p.Name == "<from_path>" {
+						p.Name = strings.TrimSuffix(filepath.Base(p.Source), filepath.Ext(p.Source))
+					} else if p.Name == "<default>" {
+						p.Name = "box_" + strconv.Itoa(boxCount)
+						boxCount++
+					}
+
+					products = append(products, p)
+				}
+
+				p = b.Product{
+					Name:     "",
+					Source:   "",
+					Size:     b.Dimensions{},
+					AddSpace: b.Dimensions{},
+					Type:     0,
+				}
+			}
+			p.Name = value
+		case "path":
+			p.Source = value
+			p.GetDimensions()
+		case "size_x":
+			p.Size.X, err = strconv.Atoi(value)
+			u.Check(err)
+		case "size_y":
+			p.Size.Y, err= strconv.Atoi(value)
+			u.Check(err)
+		case "size_z":
+			p.Size.Z, err= strconv.Atoi(value)
+			u.Check(err)
+		case "add_spc_x":
+			p.AddSpace.X, err = strconv.Atoi(value)
+			u.Check(err)
+		case "add_spc_y":
+			p.AddSpace.Y, err = strconv.Atoi(value)
+			u.Check(err)
+		case "add_spc_z":
+			p.AddSpace.Z, err = strconv.Atoi(value)
+			u.Check(err)
+		case "type":
+			if value == "flap" {
+				p.Type = 'f'
+			} else {
+				p.Type = 'm'
+			}
+		default:
+			continue
+		}
 	}
-	boardSize := u.IntPair{X: 0, Y: 0}
 
-	rack := b.ShelfPack(box, boardSize)
+	if p.Name != "" && p.Size.X > 0 && p.Size.Y > 0 && p.Size.Z > 0 {
+		if p.Name == "<from_path>" {
+			p.Name = strings.TrimSuffix(filepath.Base(p.Source), filepath.Ext(p.Source))
+		} else if p.Name == "<default>" {
+			p.Name = "box_" + strconv.Itoa(boxCount)
+			boxCount++
+		}
+		products = append(products, p)
+	}
+
+	return products
+}
+
+func ButtonPress(args ...*sciter.Value) *sciter.Value {
+
+	var (
+		products []b.Product
+		boxes []b.Box
+		outputPath string
+		boardSize u.IntPair
+		err error
+		)
+
+	in := args[0].String()
+	bs := args[1].String()
+
+	bs = u.RemoveBraces(bs)
+	sb := strings.Split(bs, ",")
+
+	boardSize.X, err = strconv.Atoi(sb[0])
+	u.Check(err)
+	boardSize.Y, err = strconv.Atoi(sb[1])
+	u.Check(err)
+	log.Println(boardSize)
+
+	outputPath = args[2].String()
+	if outputPath == "" {
+		outputPath = "./"
+	} else if outputPath[len(outputPath)-1] != '/' {
+		outputPath += "/"
+	}
+
+
+	products = getProducts(in)
+
+	for i, v := range products {
+		fmt.Println("product", i, ":", v )
+
+		tmp := b.Box{Content: v}
+		tmp.CalculateSize()
+
+		boxes = append(boxes, tmp)
+	}
+	fmt.Println("output path:", outputPath)
+
+	fmt.Println("before rack")
+	rack := b.ShelfPack(boxes, boardSize)
+	fmt.Println("after rack")
 	b.SplitToBoards(rack, boardSize, outputPath)
+	fmt.Println("after split")
 
 	return sciter.NullValue()
 }
 
-func GetSettings(args ...*sciter.Value) *sciter.Value {
+func GetSettings(_ ...*sciter.Value) *sciter.Value {
 	dataBase := db.AccessData()
 	defer func() {
 		err := dataBase.Close()

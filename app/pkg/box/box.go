@@ -2,6 +2,7 @@ package box
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -81,6 +82,8 @@ type Product struct {
 	Name   string
 	Source string
 	Size   Dimensions
+	AddSpace Dimensions // additional space for foam ETC
+	Type rune
 }
 
 type moveCut struct {
@@ -150,32 +153,32 @@ func (p *Product) GetDimensions() {
 type Box struct {
 	Content   Product
 	Size      u.IntPair
-	AddSpace Dimensions // additional space for foam ETC
-	Type rune
 }
 
 // CalculateSize calculates the size based on it's content.
 func (b *Box) CalculateSize() {
-	x, y, z, w := b.Content.Size.X + b.AddSpace.X, b.Content.Size.Y + b.AddSpace.Y, b.Content.Size.Z + b.AddSpace.Z, WallThk
-	if b.Type == 'm' {
+	x, y, z, w := b.Content.Size.X + b.Content.AddSpace.X, b.Content.Size.Y + b.Content.AddSpace.Y, b.Content.Size.Z + b.Content.AddSpace.Z, WallThk
+	if b.Content.Type == 'm' {
 		(*b).Size.X, (*b).Size.Y = 2*x+4*z+6*w, y+2*z+2*w
-	} else if b.Type == 'f' {
+	} else if b.Content.Type == 'f' {
 		(*b).Size = u.IntPair{X: 2*x + 2*y + 4*w-w/2 + 20, Y: y + 2*w + z}
 	}
 }
 
 // DefaultAddSpace sets Box's AddSpace to default values.
 func (b *Box) DefaultAddSpace() {
-	(*b).AddSpace = boxAddSpc
+	(*b).Content.AddSpace = boxAddSpc
 }
 
 // DrawBox writes lines of HPGL into file to draw box based on origin and type.
 func (b *Box) DrawBox(file *os.File, origin Point2d, boxType rune) { // types: m - mailer; f - flap; l - lidded
-	x, y, z, w := b.Content.Size.X + b.AddSpace.X, b.Content.Size.Y + b.AddSpace.Y, b.Content.Size.Z + b.AddSpace.Z, WallThk
+	x, y, z, w := b.Content.Size.X + b.Content.AddSpace.X, b.Content.Size.Y + b.Content.AddSpace.Y, b.Content.Size.Z + b.Content.AddSpace.Z, WallThk
 	var cut, engrave []string
 
+	fmt.Println(boxType, 'm')
+
 	if boxType == 'm' {
-		(*b).Type = boxType
+		log.Println("drawing m")
 		divided := y/5
 		leftWallX := 3*WallThk + 2*z
 		CutOrigin := u.IntPair{X: leftWallX - y/2}
@@ -252,7 +255,7 @@ func (b *Box) DrawBox(file *os.File, origin Point2d, boxType rune) { // types: m
 			moveCut{-w/2, -w/2, false},
 			moveCut{0, -y, true})
 	} else if boxType == 'f' {
-		(*b).Type = boxType
+		log.Println("drawing f")
 		tab, a := u.IntPair{X: 20, Y: 10}, w+y/2
 		(*b).Size = u.IntPair{X: 2*x + 2*y + 4*w-w/2 + tab.X, Y: 2*a + z}
 
@@ -320,7 +323,6 @@ func (b *Box) DrawBox(file *os.File, origin Point2d, boxType rune) { // types: m
 			moveCut{0, -z, true})
 		// draw flap box
 	} else if boxType == 'l' {
-		(*b).Type = boxType
 		// draw lidded box
 	} else {
 		log.Println("err: Invalid box type.")
@@ -491,7 +493,7 @@ func SplitToBoards(rack [][]Box, boardSize u.IntPair, outputFolder string) {
 		if v[0].Size.Y <= boardSize.Y - currPos.Y - 2*margin.Y{
 
 			for _, w := range v {
-				w.DrawBox(outputFile, currPos, 'f')
+				w.DrawBox(outputFile, currPos, w.Content.Type)
 				currPos.X += w.Size.X + boxDist.X
 			}
 			currPos.X = margin.X

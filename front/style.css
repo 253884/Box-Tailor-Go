@@ -1,0 +1,105 @@
+html{
+    background-color: #232323;
+}
+
+body {
+    background-color: #2a2a2a;
+    margin: 34px 0 0 10px;
+    border-top-left-radius: 10px;
+    padding: 3%;
+    color: #a3a3a3;
+}
+
+.tailor-title {
+    position: absolute;
+    left: 10px;
+    top: -11px;
+    color: whitesmoke;
+}
+
+.select-button {
+    font-size: 17px;
+    border-radius: 4px;
+    background: #3a3a3a;
+    color: #f5f5f5;
+    text-align: center;
+}
+
+.select-button:hover {
+    background: #232323;
+}
+
+.settings-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+b.del {
+    border: 2px solid darkred;
+    border-radius: 3px;
+    background: red;
+    color: whitesmoke;
+    text-align: center;
+
+    cursor: pointer;
+
+    display:inline-block;
+    behavior: clickable;
+    width: 1.6em;
+}
+
+b.path {
+    cursor: pointer;
+
+    display:inline-block;
+    behavior: clickable;
+    width: 1.2em;
+}
+
+.input {
+    margin-left: -1px;
+    width: 30%;
+    display: inline-block;
+}
+
+.abtn {
+    display: inline-block;
+    margin-left: -1px;
+}
+
+.setting_short {
+    display: inline-block;
+    width: 30px;
+}
+
+.setting_long {
+    display: inline-block;
+    width: 53px;
+}
+
+.setting_longer {
+    display: inline-block;
+    width: 75px;
+}
+
+.setting_path {
+    display: inline-block;
+    width: 119px;
+}
+
+li {
+    font:system;
+    behavior:form; /*it has compound value*/
+}
+li {
+    flow:horizontal;
+    border-spacing: 1em;
+    vertical-align: middle;
+}
+li > span {
+    display:block;
+    width: max-content;
+}

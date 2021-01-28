@@ -55,10 +55,30 @@ func Area(arr ...int) int {
 	return result
 }
 
-// DelChar removes a char from the string.
+// DelChar removes a char from the string and returns the string.
 func DelChar(s string, i int) string {
 	r := []rune(s)
 	return string(append(r[0:i], r[i+1:]...))
+}
+
+func RemoveQuotes(s string) string{
+	if string(s[0]) == `"` {
+		if string(s[len(s)-1]) == `"` {
+			s = DelChar(s, 0)
+			s = DelChar(s, len(s)-1)
+		}
+	}
+	return s
+}
+
+func RemoveBraces(s string) string {
+	if s[0] == '[' {
+		if s[len(s)-1] == ']' {
+			s = DelChar(s, 0)
+			s = DelChar(s, len(s)-1)
+		}
+	}
+	return s
 }
 
 // GetNumbers looks for numbers in provided string and returns them as string slice separately.

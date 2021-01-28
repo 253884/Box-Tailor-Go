@@ -1,0 +1,78 @@
+function Element.toggle()
+{
+    this.attributes["hidden"] = this.attributes["hidden"] ? undefined : true;
+}
+
+$(#settings).attributes["hidden"] = true;
+event click $(#settings_button) {
+    var str = view.getSettings();
+    var res = str.split("|");
+
+    $(#wall_thk).value = res[0];
+    $(#margin_x).value = res[1];
+    $(#margin_y).value = res[2];
+    $(#box_dist_x).value = res[3];
+    $(#box_dist_y).value = res[4];
+    $(#box_add_spc_x).value = res[5];
+    $(#box_add_spc_y).value = res[6];
+    $(#box_add_spc_z).value = res[7];
+    $(#def_board_x).value = res[8];
+    $(#def_board_y).value = res[9];
+
+    $(#app).toggle();
+    $(#settings).toggle();
+}
+
+event click $(#cancel_settings) {
+    $(#app).toggle();
+    $(#settings).toggle();
+}
+
+event click $(#apply_settings) {
+    if( $(#wall_thk).value < 1 ){
+        $(#wall_thk).value = 1;
+    }
+    if( $(#margin_x).value < 0 ){
+        $(#margin_y).value = 0;
+    }
+    if( $(#margin_y).value < 0 ){
+        $(#margin_y).value = 0;
+    }
+    if( $(#box_dist_x).value < 0 ){
+        $(#box_dist_x).value = 0;
+    }
+    if( $(#box_dist_y).value < 0 ){
+        $(#box_dist_y).value = 0;
+    }
+    if( $(#box_add_spc_x).value < 0 ){
+        $(#box_add_spc_x).value = 0;
+    }
+    if( $(#box_add_spc_y).value < 0 ){
+        $(#box_add_spc_y).value = 0;
+    }
+    if( $(#box_add_spc_z).value < 0 ){
+        $(#box_add_spc_z).value = 0;
+    }
+    if( $(#def_board_x).value < 1 ){
+        $(#def_board_x).value = 1;
+    }
+    if( $(#def_board_y).value < 1 ){
+        $(#def_board_y).value = 1;
+    }
+
+    var wallThk = $(#wall_thk).value;
+    var marginX = $(#margin_x).value;
+    var marginY = $(#margin_y).value;
+    var boxDistX = $(#box_dist_x).value;
+    var boxDistY = $(#box_dist_y).value;
+    var boxAddSpcX = $(#box_add_spc_x).value;
+    var boxAddSpcY = $(#box_add_spc_y).value;
+    var boxAddSpcZ = $(#box_add_spc_z).value;
+    var defBoardX = $(#def_board_x).value;
+    var defBoardY = $(#def_board_y).value;
+
+    view.changeSettings(wallThk, marginX, marginY, boxDistX, boxDistY, boxAddSpcX, boxAddSpcY, boxAddSpcZ, defBoardX, defBoardY);
+
+    $(#app).toggle();
+    $(#settings).toggle();
+}

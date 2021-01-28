@@ -1,0 +1,144 @@
+var byPath = { name:"<from_path>", path:"", size_z:0, add_spc_x:0, add_spc_y:0, add_spc_z:0, type:"flap" }
+var byDims = { name:"<default>", size_x:0, size_y:0, size_z:0, add_spc_x:0, add_spc_y:0, add_spc_z:0, type:"flap" }
+var data = [];
+
+event click $(#load_defaults) {
+    var str = view.getSettings();
+    var res = str.split("|");
+
+    var list = $(#list);
+    for(var li in list){
+        var input = li.value;
+
+        input.add_spc_x = res[5];
+        input.add_spc_y = res[6];
+        input.add_spc_z = res[7];
+
+        li.value = input;
+    }
+
+    byPath.add_spc_x = res[5];
+    byPath.add_spc_y = res[6];
+    byPath.add_spc_z = res[7];
+
+    byDims.add_spc_x = res[5];
+    byDims.add_spc_y = res[6];
+    byDims.add_spc_z = res[7];
+
+    $(#board_x).value = res[8];
+    $(#board_y).value = res[9];
+}
+
+function removeList() {
+        var list = $(#list);
+
+        list.remove();
+
+         var div = $(#list_div);
+         div.append(<ol#list></ol>);
+}
+
+event click $(#add_by_path)() {
+    var list = $(#list);
+    var item = byPath;
+
+    list.append(<li>
+        <input|text(name) class="setting_longer"/>
+        <label> | </label>
+        <input|text(path) class="setting_path" readonly/>
+        <b.path>...</b>
+        <input|number(size_z) class="setting_short"/>
+        <label> | </label>
+        <input|number(add_spc_x) class="setting_short"/>
+        <input|number(add_spc_y) class="setting_short"/>
+        <input|number(add_spc_z) class="setting_short"/>
+        <label> | </label>
+        <select(type)>
+            <option>flap</option>
+            <option>message</option>
+        </select>
+        <label> | </label>
+        <b.del>x</b>
+    </li>);
+
+    list.last.value = item;
+}
+
+event click $(#add_by_dims)() {
+    var list = $(#list);
+    var item = byDims;
+
+    list.append(<li>
+        <input|text(name) class="setting_longer"/>
+        <label> | </label>
+        <input|number(size_x) class="setting_long"/>
+        <input|number(size_y) class="setting_long"/>
+        <input|number(size_z) class="setting_long"/>
+        <label> | </label>
+        <input|number(add_spc_x) class="setting_short"/>
+        <input|number(add_spc_y) class="setting_short"/>
+        <input|number(add_spc_z) class="setting_short"/>
+        <label> | </label>
+        <select(type)>
+            <option>flap</option>
+            <option>message</option>
+        </select>
+        <label> | </label>
+        <b.del>x</b>
+    </li>);
+
+    list.last.value = item;
+}
+
+event click $(#clear_list) {
+    removeList();
+}
+
+event click $(b.del) (evt, b) {
+  var li = b.$p(li);
+  li.remove();
+}
+
+event click $(b.path) (evt, b) {
+
+    var li = b.$p(li);
+
+    var input = li.value;
+
+    var inP = view.selectFile(#open, "PLT Files (*.plt)|*.PLT|All Files(*.*)|*.*", "plt");
+    input.path = URL.toPath(inP);
+
+    li.value = input;
+}
+
+event click $(#select_folder_button) {
+    var outputFolder = view.selectFolder();
+
+    if(outputFolder) {
+        outputFolder = URL.toPath(outputFolder);
+        $(#output_folder_path).value = outputFolder;
+    }
+}
+
+function getData() {
+  var out = [];
+  var list = $(#list);
+  for(var li in list)
+    out.push(li.value);
+  return out;
+}
+
+event click $(#tailor_button) {
+    var outputData = JSON.stringify( getData(), "");
+    var outputPath = $(#output_folder_path).value;
+    var board = [$(#board_x).value, $(#board_y).value];
+
+    if(board[0] == 0 || board[0] == 0){
+        view.msgbox(#alert, "Board size too small.", "Task failed.")
+    }else if(outputData != "[]") {
+        view.buttonPress(outputData, JSON.stringify(board), outputPath);
+        removeList();
+    } else {
+        view.msgbox(#alert, "Product list is empty!", "Task failed.")
+    }
+}
