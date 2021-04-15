@@ -2,7 +2,6 @@ package box
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,12 +15,11 @@ import (
 const Unit = 40 // 40 points per mm in HPGL
 
 var (
-	WallThk = 4
-	margin = u.IntPair{X: 10, Y: 10} // 10mm margin
-	boxDist = u.IntPair{X: 1, Y: 1} // 1mm space between boxes
-	boxAddSpc = Dimensions{X: 60,Y: 60,Z: 120} // additional space for foam ETC
-	defBoard = u.IntPair{X: 3500, Y: 2500}
-
+	WallThk   = 4
+	margin    = u.IntPair{X: 10, Y: 10}          // 10mm margin
+	boxDist   = u.IntPair{X: 1, Y: 1}            // 1mm space between boxes
+	boxAddSpc = Dimensions{X: 60, Y: 60, Z: 120} // additional space for foam ETC
+	defBoard  = u.IntPair{X: 3500, Y: 2500}
 ) // settings
 
 func UpdateSettingValues() {
@@ -79,15 +77,15 @@ type Dimensions struct {
 }
 
 type Product struct {
-	Name   string
-	Source string
-	Size   Dimensions
+	Name     string
+	Source   string
+	Size     Dimensions
 	AddSpace Dimensions // additional space for foam ETC
-	Type rune
+	Type     rune
 }
 
 type moveCut struct {
-	x, y int
+	x, y  int
 	toCut bool
 }
 
@@ -151,17 +149,17 @@ func (p *Product) GetDimensions() {
 }
 
 type Box struct {
-	Content   Product
-	Size      u.IntPair
+	Content Product
+	Size    u.IntPair
 }
 
 // CalculateSize calculates the size based on it's content.
 func (b *Box) CalculateSize() {
-	x, y, z, w := b.Content.Size.X + b.Content.AddSpace.X, b.Content.Size.Y + b.Content.AddSpace.Y, b.Content.Size.Z + b.Content.AddSpace.Z, WallThk
+	x, y, z, w := b.Content.Size.X+b.Content.AddSpace.X, b.Content.Size.Y+b.Content.AddSpace.Y, b.Content.Size.Z+b.Content.AddSpace.Z, WallThk
 	if b.Content.Type == 'm' {
 		(*b).Size.X, (*b).Size.Y = 2*x+4*z+6*w, y+2*z+2*w
 	} else if b.Content.Type == 'f' {
-		(*b).Size = u.IntPair{X: 2*x + 2*y + 4*w-w/2 + 20, Y: y + 2*w + z}
+		(*b).Size = u.IntPair{X: 2*x + 2*y + 4*w - w/2 + 20, Y: y + 2*w + z}
 	}
 }
 
@@ -172,14 +170,14 @@ func (b *Box) DefaultAddSpace() {
 
 // DrawBox writes lines of HPGL into file to draw box based on origin and type.
 func (b *Box) DrawBox(file *os.File, origin Point2d, boxType rune) { // types: m - mailer; f - flap; l - lidded
-	x, y, z, w := b.Content.Size.X + b.Content.AddSpace.X, b.Content.Size.Y + b.Content.AddSpace.Y, b.Content.Size.Z + b.Content.AddSpace.Z, WallThk
+	x, y, z, w := b.Content.Size.X+b.Content.AddSpace.X, b.Content.Size.Y+b.Content.AddSpace.Y, b.Content.Size.Z+b.Content.AddSpace.Z, WallThk
 	var cut, engrave []string
 
-	fmt.Println(boxType, 'm')
+	//fmt.Println(boxType, 'm')
 
 	if boxType == 'm' {
 		log.Println("drawing m")
-		divided := y/5
+		divided := y / 5
 		leftWallX := 3*WallThk + 2*z
 		CutOrigin := u.IntPair{X: leftWallX - y/2}
 		if CutOrigin.X < 0 {
@@ -187,77 +185,77 @@ func (b *Box) DrawBox(file *os.File, origin Point2d, boxType rune) { // types: m
 		} // too long
 
 		orgOrigin := origin
-		origin.X, origin.Y = origin.X + CutOrigin.X, origin.Y + CutOrigin.Y
+		origin.X, origin.Y = origin.X+CutOrigin.X, origin.Y+CutOrigin.Y
 
-		(*b).Size.X, (*b).Size.Y = 2*x+4*z+7*w, y+2*z+2*w// calculate box dimensions
+		(*b).Size.X, (*b).Size.Y = 2*x+4*z+7*w, y+2*z+2*w // calculate box dimensions
 
-		cut = returnPLT( origin, 1,
+		cut = returnPLT(origin, 1,
 			leftWallX-CutOrigin.X+WallThk+x+w+z, // x
-				z, // y
-			-(z+w),
-				WallThk,
+			z, // y
+			-(z + w),
+			WallThk,
 			WallThk+z+WallThk,
-				-(WallThk + z),
-			x,
-				WallThk+z,
-			WallThk+z,
-				y,
 			-(WallThk + z),
-				WallThk+z,
-			-x,
-				-(WallThk + z),
-			-(WallThk + z + WallThk),
-				WallThk,
+			x,
 			WallThk+z,
-				z,
-			-(leftWallX-CutOrigin.X+WallThk+x + WallThk+z),
-				-z,
+			WallThk+z,
+			y,
+			-(WallThk + z),
+			WallThk+z,
+			-x,
+			-(WallThk + z),
+			-(WallThk + z + WallThk),
+			WallThk,
+			WallThk+z,
+			z,
+			-(leftWallX - CutOrigin.X + WallThk + x + WallThk + z),
+			-z,
 			leftWallX-CutOrigin.X+WallThk,
-				-WallThk,
+			-WallThk,
 			-leftWallX,
-				-divided,
+			-divided,
 			-w,
-				-divided,
+			-divided,
 			w,
-				-(y - 4*divided),
+			-(y - 4*divided),
 			-w,
-				-divided,
+			-divided,
 			w,
-				-divided,
+			-divided,
 			leftWallX,
-				-w,
-			-(leftWallX-CutOrigin.X+WallThk),
-				-z)
+			-w,
+			-(leftWallX - CutOrigin.X + WallThk),
+			-z)
 		//cut = append(cut, "PA:" + strconv.Itoa(origin.X) + " " + strconv.Itoa(origin.Y) + ";")
 		engrave = engravePLT(orgOrigin, 2,
-			moveCut{leftWallX+w/2, 0, false},
+			moveCut{leftWallX + w/2, 0, false},
 			moveCut{0, z, true},
 			moveCut{0, w, false},
 			moveCut{0, y, true},
 			moveCut{0, w, false},
 			moveCut{0, z, true},
-			moveCut{w/2, -(z+w/2), false},
+			moveCut{w / 2, -(z + w/2), false},
 			moveCut{x, 0, true},
-			moveCut{w/2, z+w/2, false},
+			moveCut{w / 2, z + w/2, false},
 			moveCut{0, -z, true},
 			moveCut{0, -w, false},
 			moveCut{0, -y, true},
 			moveCut{0, -w, false},
 			moveCut{0, -z, true},
-			moveCut{-(x+w/2), z+w/2, false},
+			moveCut{-(x + w/2), z + w/2, false},
 			moveCut{x, 0, true},
-			moveCut{z+2*w, 0, false},
+			moveCut{z + 2*w, 0, false},
 			moveCut{x, 0, true},
-			moveCut{w/2, w/2, false},
+			moveCut{w / 2, w / 2, false},
 			moveCut{0, y, true},
-			moveCut{-w/2, w/2, false},
+			moveCut{-w / 2, w / 2, false},
 			moveCut{-x, 0, true},
-			moveCut{-w/2, -w/2, false},
+			moveCut{-w / 2, -w / 2, false},
 			moveCut{0, -y, true})
 	} else if boxType == 'f' {
 		log.Println("drawing f")
 		tab, a := u.IntPair{X: 20, Y: 10}, w+y/2
-		(*b).Size = u.IntPair{X: 2*x + 2*y + 4*w-w/2 + tab.X, Y: 2*a + z}
+		(*b).Size = u.IntPair{X: 2*x + 2*y + 4*w - w/2 + tab.X, Y: 2*a + z}
 
 		cut = engravePLT(origin, 1,
 			moveCut{0, 0, false},
@@ -273,15 +271,15 @@ func (b *Box) DrawBox(file *os.File, origin Point2d, boxType rune) { // types: m
 			moveCut{0, a, true},
 			moveCut{w, 0, true},
 			moveCut{0, -a, true},
-			moveCut{y-w/2, 0, true},
+			moveCut{y - w/2, 0, true},
 			moveCut{0, a, true},
 			//moveCut{w, 0, true},
 			moveCut{tab.X, tab.Y, true},
-			moveCut{0, z-2*tab.Y, true},
+			moveCut{0, z - 2*tab.Y, true},
 			moveCut{-tab.X, tab.Y, true},
 			//moveCut{-w, 0, true},
 			moveCut{0, a, true},
-			moveCut{-(y-w/2), 0, true},
+			moveCut{-(y - w/2), 0, true},
 			moveCut{0, -a, true},
 			moveCut{-w, 0, true},
 			moveCut{0, a, true},
@@ -297,29 +295,29 @@ func (b *Box) DrawBox(file *os.File, origin Point2d, boxType rune) { // types: m
 			moveCut{0, -(2*a + z), true})
 
 		engrave = engravePLT(origin, 2,
-			moveCut{0, a-w/2, false},
+			moveCut{0, a - w/2, false},
 			moveCut{x, 0, true},
 			moveCut{w, 0, false},
 			moveCut{y, 0, true},
 			moveCut{w, 0, false},
 			moveCut{x, 0, true},
 			moveCut{w, 0, false},
-			moveCut{y-w/2, 0, true},
-			moveCut{0, w/2, false},
+			moveCut{y - w/2, 0, true},
+			moveCut{0, w / 2, false},
 			moveCut{0, z, true},
-			moveCut{0, w/2, false},
-			moveCut{-(y-w/2), 0, true},
+			moveCut{0, w / 2, false},
+			moveCut{-(y - w/2), 0, true},
 			moveCut{-w, 0, false},
 			moveCut{-x, 0, true},
 			moveCut{-w, 0, false},
 			moveCut{-y, 0, true},
 			moveCut{-w, 0, false},
 			moveCut{-x, 0, true},
-			moveCut{x+w/2, -w/2, false},
+			moveCut{x + w/2, -w / 2, false},
 			moveCut{0, -z, true},
-			moveCut{y+w, 0, false},
+			moveCut{y + w, 0, false},
 			moveCut{0, z, true},
-			moveCut{x+w, 0, false},
+			moveCut{x + w, 0, false},
 			moveCut{0, -z, true})
 		// draw flap box
 	} else if boxType == 'l' {
@@ -371,7 +369,7 @@ func removeBox(b []Box, i int) []Box {
 func returnPLT(origin Point2d, pen int, arr ...int) []string {
 	var result []string
 	log.Println(origin)
-	result = append(result, "SP" + strconv.Itoa(pen) + ";")
+	result = append(result, "SP"+strconv.Itoa(pen)+";")
 	result = append(result, origin.move(0, 0))
 	for i, v := range arr {
 		if i%2 == 0 {
@@ -386,9 +384,9 @@ func returnPLT(origin Point2d, pen int, arr ...int) []string {
 	return result
 }
 
-func engravePLT (origin Point2d, pen int, arr ...moveCut) []string {
+func engravePLT(origin Point2d, pen int, arr ...moveCut) []string {
 	var result []string
-	result = append(result, "SP" + strconv.Itoa(pen) + ";")
+	result = append(result, "SP"+strconv.Itoa(pen)+";")
 
 	for _, v := range arr {
 		if v.toCut {
@@ -414,16 +412,16 @@ func ShelfPack(boxes []Box, boardSize u.IntPair) [][]Box {
 	})
 
 	var (
-		shelf []Box
-		rack [][]Box
+		shelf   []Box
+		rack    [][]Box
 		currPos int
 	)
 
 	for len(boxes) > 0 {
-		i := lessOrEqual(boxes, boardSize.X - currPos, 'x')
+		i := lessOrEqual(boxes, boardSize.X-currPos, 'x')
 
 		if i == -1 {
-			currPos= 0
+			currPos = 0
 
 			rack = append(rack, shelf)
 			shelf = []Box{}
@@ -446,7 +444,7 @@ func ShelfPack(boxes []Box, boardSize u.IntPair) [][]Box {
 
 // CreateNewBoard creates a new board file.
 func createNewBoard(outputFolder string, i int, boardSize u.IntPair) *os.File {
-	outputFile, err := os.Create(outputFolder+"board_" + strconv.Itoa(i)+".plt")
+	outputFile, err := os.Create(outputFolder + "board_" + strconv.Itoa(i) + ".plt")
 	if err != nil {
 		panic(err)
 	}
@@ -465,7 +463,7 @@ func SplitToBoards(rack [][]Box, boardSize u.IntPair, outputFolder string) {
 	var (
 		//margin = u.IntPair{X: 10, Y: 10} // 10mm margin
 		//boxDist = u.IntPair{X: 1, Y: 1} // 1mm space between boxes
-		currPos = Point2d{X: margin.X, Y: margin.Y}
+		currPos      = Point2d{X: margin.X, Y: margin.Y}
 		boardCounter = 0
 	)
 
@@ -490,7 +488,7 @@ func SplitToBoards(rack [][]Box, boardSize u.IntPair, outputFolder string) {
 	}()
 
 	for _, v := range rack {
-		if v[0].Size.Y <= boardSize.Y - currPos.Y - 2*margin.Y{
+		if v[0].Size.Y <= boardSize.Y-currPos.Y-2*margin.Y {
 
 			for _, w := range v {
 				w.DrawBox(outputFile, currPos, w.Content.Type)
@@ -510,7 +508,7 @@ func SplitToBoards(rack [][]Box, boardSize u.IntPair, outputFolder string) {
 
 			currPos = Point2d{X: margin.X, Y: margin.Y}
 
-			if v[0].Size.Y <= boardSize.Y - currPos.Y - 2*margin.Y {
+			if v[0].Size.Y <= boardSize.Y-currPos.Y-2*margin.Y {
 				for _, w := range v {
 					w.DrawBox(outputFile, currPos, 'f')
 					currPos.X += w.Size.X + boxDist.X
