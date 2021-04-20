@@ -71,9 +71,9 @@ func ReadSettings(dataBase *sql.DB) []int {
 
 	for rows.Next() {
 		var (
-			tmpId int
+			tmpId   int
 			tmpName string
-			tmpVal int
+			tmpVal  int
 		)
 		err = rows.Scan(&tmpId, &tmpName, &tmpVal)
 		if err != nil {

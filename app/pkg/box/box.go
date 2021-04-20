@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strconv"
 
-	"../db"
-	u "../utility"
+	"box-tailor-go/app/pkg/db"
+	u "box-tailor-go/app/pkg/utility"
 )
 
 const Unit = 40 // 40 points per mm in HPGL

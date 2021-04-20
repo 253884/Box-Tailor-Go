@@ -68,9 +68,6 @@ func main() {
 	win.DefineFunction("getSettings", s.GetSettings)
 	win.DefineFunction("changeSettings", s.ChangeSettings)
 
-	//log.Println("Before")
 	win.Show()
-	//log.Println("Show")
 	win.Run()
-	//log.Println("Run")
 }

@@ -1,9 +1,9 @@
 package sct
 
 import (
-	b "../box"
-	"../db"
-	u "../utility"
+	b "box-tailor-go/app/pkg/box"
+	"box-tailor-go/app/pkg/db"
+	u "box-tailor-go/app/pkg/utility"
 	"path/filepath"
 
 	"fmt"
@@ -19,7 +19,7 @@ func getProducts(s string) []b.Product {
 	var (
 		products []b.Product
 		boxCount int
-		)
+	)
 
 	rule, err := regexp.Compile(`"(.*?)"`) // look for text between quotes
 	u.Check(err)
@@ -90,10 +90,10 @@ func getProducts(s string) []b.Product {
 			p.Size.X, err = strconv.Atoi(value)
 			u.Check(err)
 		case "size_y":
-			p.Size.Y, err= strconv.Atoi(value)
+			p.Size.Y, err = strconv.Atoi(value)
 			u.Check(err)
 		case "size_z":
-			p.Size.Z, err= strconv.Atoi(value)
+			p.Size.Z, err = strconv.Atoi(value)
 			u.Check(err)
 		case "add_spc_x":
 			p.AddSpace.X, err = strconv.Atoi(value)
@@ -131,12 +131,12 @@ func getProducts(s string) []b.Product {
 func ButtonPress(args ...*sciter.Value) *sciter.Value {
 
 	var (
-		products []b.Product
-		boxes []b.Box
+		products   []b.Product
+		boxes      []b.Box
 		outputPath string
-		boardSize u.IntPair
-		err error
-		)
+		boardSize  u.IntPair
+		err        error
+	)
 
 	in := args[0].String()
 	bs := args[1].String()
@@ -157,11 +157,10 @@ func ButtonPress(args ...*sciter.Value) *sciter.Value {
 		outputPath += "/"
 	}
 
-
 	products = getProducts(in)
 
 	for i, v := range products {
-		fmt.Println("product", i, ":", v )
+		fmt.Println("product", i, ":", v)
 
 		tmp := b.Box{Content: v}
 		tmp.CalculateSize()
