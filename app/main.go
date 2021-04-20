@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/sciter-sdk/go-sciter/rice"
 	"log"
 
-	"./pkg/box"
-	"./pkg/db"
-	s "./pkg/sct"
+	"box-tailor-go/app/pkg/box"
+	"box-tailor-go/app/pkg/db"
+	s "box-tailor-go/app/pkg/sct"
 
 	"github.com/sciter-sdk/go-sciter"
+	"github.com/sciter-sdk/go-sciter/rice"
 	"github.com/sciter-sdk/go-sciter/window"
 )
 
@@ -32,10 +32,10 @@ func main() {
 	// create new window
 	win, err := window.New(
 		sciter.SW_MAIN|
-		sciter.SW_ENABLE_DEBUG|
-		sciter.SW_CONTROLS|
-		sciter.SW_RESIZEABLE|
-		sciter.SW_TITLEBAR,
+			sciter.SW_ENABLE_DEBUG|
+			sciter.SW_CONTROLS|
+			sciter.SW_RESIZEABLE|
+			sciter.SW_TITLEBAR,
 		winRect)
 	if err != nil {
 		panic(err)
@@ -57,9 +57,9 @@ func main() {
 	ok := win.SetOption(
 		sciter.SCITER_SET_SCRIPT_RUNTIME_FEATURES,
 		sciter.ALLOW_FILE_IO|
-		sciter.ALLOW_SOCKET_IO|
-		sciter.ALLOW_EVAL|
-		sciter.ALLOW_SYSINFO)
+			sciter.ALLOW_SOCKET_IO|
+			sciter.ALLOW_EVAL|
+			sciter.ALLOW_SYSINFO)
 	if !ok {
 		log.Println("failed to enable features")
 	}
