@@ -34,5 +34,5 @@ Message boxes:
 
 ## Note: 
 
-Project **abandoned**. It will be included on my website in the future using [the follow-up project](https://github.com/happyRip/Box-Tailor), which is a package instead of a GUI application.
+Project **abandoned**. Working with `Sciter` was not as pleasant as using pure Go and Web tools. Nonetheless the tool will be accessible on my website in the future utilizing [the follow-up project](https://github.com/happyRip/Box-Tailor).
 
