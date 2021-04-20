@@ -32,5 +32,7 @@ Message boxes:
 
 ![box_tailor_plt_2](https://user-images.githubusercontent.com/73070465/115379219-9d0c5500-a1d1-11eb-8f38-12a11c653c34.png)
 
+## Note: 
+
 Project **abandoned**. It will be included on my website in the future using [the follow-up project](https://github.com/happyRip/Box-Tailor), which is a package instead of a GUI application.
 
